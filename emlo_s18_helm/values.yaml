@@ -1,0 +1,23 @@
+namespace: "default"
+
+
+appName:
+  model: 'model-serve'
+  web: 'web-serve'
+  ingress: "web-ingress"
+
+hfmodel: "gpt2"
+
+configMap:
+  modelServer: "model-config-v1.0"
+  redis: "redis-config-v1.0"
+
+secretKey:
+  redis: "redis-secret-v1.0"
+
+image:
+  modelServer: "public.ecr.aws/f2t6q8t2/emlov3_s18:model"
+  webServer: "public.ecr.aws/f2t6q8t2/emlov3_s18:web"
+  redis: "redis:7.2.1"
+
+# hostname: "secure-evident-hyena.ngrok-free.app"

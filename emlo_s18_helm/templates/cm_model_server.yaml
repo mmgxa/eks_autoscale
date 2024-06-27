@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.configMap.modelServer }}
+data:
+  model_server_url: "http://{{ .Values.appName.model }}:9000"
+  hf_model: {{ .Values.hfmodel }}

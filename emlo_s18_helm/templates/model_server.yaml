@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appName.model }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.appName.model }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.appName.model }}
+    spec:
+      nodeSelector:    
+        karpenter.sh/capacity-type: spot
+      # affinity:
+      #   nodeAffinity:
+      #     requiredDuringSchedulingIgnoredDuringExecution:
+      #       nodeSelectorTerms:
+      #         - matchExpressions:
+      #             - key: "k8s.io/cluster-autoscaler/node-template/label/role"
+      #               operator: In
+      #               values:
+      #                 - spot
+      containers:
+        - name: {{ .Values.appName.model }}
+          image: {{ .Values.image.modelServer }}
+          resources:
+            limits:
+              memory: "1024Mi"
+              cpu: "1.0"
+          ports:
+            - containerPort: 80
+          env:
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configMap.redis }}
+                  key: hostname
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configMap.redis }}
+                  key: port
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretKey.redis }}
+                  key: db_password
+            - name: HF_MODEL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configMap.modelServer }}
+                  key: hf_model
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.appName.model }}
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: {{ .Values.appName.model }}
+  ports:
+    - port: 9000
+      targetPort: 80
+  type: NodePort
